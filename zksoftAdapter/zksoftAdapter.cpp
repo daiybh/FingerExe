@@ -51,12 +51,8 @@ CzksoftAdapterApp::CzksoftAdapterApp()
 
 CzksoftAdapterApp::~CzksoftAdapterApp()
 {
-	printf("CzksoftAdapterApp::~CzksoftAdapterApp()===1===\n");
 	g_Adapter.Release();
-	//m_pXMLDom.Release();
-	printf("CzksoftAdapterApp::~CzksoftAdapterApp()===2\n");
 	CoUninitialize();
-	printf("CzksoftAdapterApp::~CzksoftAdapterApp()===3\n");
 }
 
 // 唯一的一个 CzksoftAdapterApp 对象

@@ -45,7 +45,6 @@ int CAdapter::Create()
 void CAdapter::Release()
 {
 	if(m_bInit){
-		printf("release()======%x\n",m_pIZKEM.GetInterfacePtr());
 		try{
 			m_pIZKEM.Release();
 			m_bInit=FALSE;

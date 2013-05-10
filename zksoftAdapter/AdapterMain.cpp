@@ -358,6 +358,19 @@ JNIEXPORT jstring JNICALL Java_com_yumt_zksoft_ZKTCP_GetAllUserInfo
 	
 	return CStringTojstring(pjniEnv,ZKTCP::GetAllUserInfo_WithJson(dwMachineNumber));
 }
+char* jstringToWindows( JNIEnv *env, jstring jstr )
+{  
+	int length = (env)->GetStringLength(jstr );
+	const jchar* jcstr = (env)->GetStringChars(jstr, 0 );
+	char* rtn = (char*)malloc( length*2+1 );
+	int size = 0;
+	size = WideCharToMultiByte( CP_ACP, 0, (LPCWSTR)jcstr, length, rtn,(length*2+1), NULL, NULL );
+	(env)->ReleaseStringChars(jstr, jcstr );
+	if( size <= 0 )
+		return NULL;
+	rtn[size] = 0;
+	return rtn;
+}  
 /*
  * Class:     com_yumt_zksoft_ZKTCP
  * Method:    SetUserInfo
@@ -366,16 +379,25 @@ JNIEXPORT jstring JNICALL Java_com_yumt_zksoft_ZKTCP_GetAllUserInfo
 JNIEXPORT jboolean JNICALL Java_com_yumt_zksoft_ZKTCP_SetUserInfo
 (JNIEnv *pjniEnv, jclass cObject, jlong dwMachineNumber, jlong dwEnrollNumber, jstring name, jstring pass, jlong privilege, jboolean enable){
 	OutPutFuncName(__FUNCTION__);
-	if(!CheckConnectStatus())return false;
+	//if(!CheckConnectStatus())return false;
 
-	const char *nativeName= pjniEnv->GetStringUTFChars(name,0);
+// 	const char *nativeName= pjniEnv->GetStringUTFChars(name,0);
+// 	const char *nativePass= pjniEnv->GetStringUTFChars(pass,0);
 
-	const char *nativePass= pjniEnv->GetStringUTFChars(pass,0);
+	char *nativeName= jstringToWindows(pjniEnv,name);
 
+	char *nativePass= jstringToWindows(pjniEnv,pass);
+
+	printf("name:%s\npass:%s\n",nativeName,nativePass);
 	BOOL bRet = g_Adapter.SetUserInfo(dwMachineNumber,dwEnrollNumber,nativeName,nativePass,privilege,enable);
 
-	pjniEnv->ReleaseStringUTFChars(name,nativeName);
-	pjniEnv->ReleaseStringUTFChars(pass,nativePass);
+	if(nativeName)
+		delete [] nativeName;
+	if(nativePass)
+		delete []nativePass;
+
+	//pjniEnv->ReleaseStringUTFChars(name,nativeName);
+	//pjniEnv->ReleaseStringUTFChars(pass,nativePass);
 
 	return bRet;
 }
