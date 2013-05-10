@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FingerExe", "FingerExe\FingerExe.vcproj", "{13FED6D1-5CA1-4F20-9895-42AFF1D7EA03}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zksoftAdapter", "zksoftAdapter\zksoftAdapter.vcproj", "{57C5D1EA-ED97-4C14-B4AC-68F924F05B65}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13FED6D1-5CA1-4F20-9895-42AFF1D7EA03}.Debug|Win32.ActiveCfg = Debug|Win32
+		{13FED6D1-5CA1-4F20-9895-42AFF1D7EA03}.Debug|Win32.Build.0 = Debug|Win32
+		{13FED6D1-5CA1-4F20-9895-42AFF1D7EA03}.Release|Win32.ActiveCfg = Release|Win32
+		{13FED6D1-5CA1-4F20-9895-42AFF1D7EA03}.Release|Win32.Build.0 = Release|Win32
+		{57C5D1EA-ED97-4C14-B4AC-68F924F05B65}.Debug|Win32.ActiveCfg = Debug|Win32
+		{57C5D1EA-ED97-4C14-B4AC-68F924F05B65}.Debug|Win32.Build.0 = Debug|Win32
+		{57C5D1EA-ED97-4C14-B4AC-68F924F05B65}.Release|Win32.ActiveCfg = Release|Win32
+		{57C5D1EA-ED97-4C14-B4AC-68F924F05B65}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

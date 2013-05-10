@@ -1,0 +1,10 @@
+// zksoftAdapter.idl : zksoftAdapter.dll 的类型库源
+// 此文件将由 MIDL 编译器处理以产生
+// 类型库(zksoftAdapter.tlb)。
+
+[ uuid(BEEF9FFB-9065-4422-9C07-20C1B9DC2E79), version(1.0) ]
+library zksoftAdapter
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+};
