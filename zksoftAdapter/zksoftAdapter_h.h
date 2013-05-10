@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 7.00.0500 */
-/* at Tue May 07 13:35:46 2013
+/* at Fri May 10 15:47:48 2013
  */
 /* Compiler settings for .\zksoftAdapter.idl:
     Oicf, W1, Zp8, env=Win32 (32b run)

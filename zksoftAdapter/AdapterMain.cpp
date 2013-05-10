@@ -15,7 +15,7 @@ BOOL CheckConnectStatus()
 	return g_Adapter.CheckConnectStatus();
 }
 jstring CStringTojstring(JNIEnv *m_penv,CString convert)  
-{  
+{  	
 	jstring retjstring;  
 	jsize iLoop;  
 	jsize jlength = convert.GetLength();  
@@ -416,13 +416,18 @@ JNIEXPORT jboolean JNICALL Java_com_yumt_zksoft_ZKTCP_SetUserTmpStr
 JNIEXPORT jstring JNICALL Java_com_yumt_zksoft_ZKTCP_GetUserTmpStr
 (JNIEnv *pjniEnv, jclass cObject, jlong dwMachineNumber, jlong dwEnrollNumber, jlong dwFingerIndex){
 	OutPutFuncName(__FUNCTION__);
-	if(!CheckConnectStatus())return NULL;
-	BSTR tempData;
-	long tempLength;
-	BOOL bRet = g_Adapter.GetUserTmpStr(dwMachineNumber,dwEnrollNumber,dwFingerIndex,&tempData,&tempLength);
-	if(bRet){
-		jsize len = SysStringLen(tempData);
-		return pjniEnv->NewString(tempData,len);
+	CString strRet(_T("{log:[len:0,tempdata:\"\"]}"));
+	strRet=_T("");
+	if(!CheckConnectStatus())return CStringTojstring(pjniEnv,strRet);	
+	BSTR tempData=NULL;
+	long tempLength=0;	
+	if(g_Adapter.GetUserTmpStr(dwMachineNumber,dwEnrollNumber,dwFingerIndex,&tempData,&tempLength)){
+
+		CString strTempData(tempData);	
+		strRet=strTempData;
+		//strRet.Format(_T("{log:[len:%d,tempdata:\"%s\"]}"),tempLength,strTempData/*_T("fingerdata")*/);					
 	}
-	return NULL;
+	if(tempData!=NULL) 
+		SysFreeString(tempData);		
+	return CStringTojstring(pjniEnv,strRet);
 }

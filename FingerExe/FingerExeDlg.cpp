@@ -84,6 +84,7 @@ BEGIN_MESSAGE_MAP(CFingerExeDlg, CDialog)
 	ON_BN_CLICKED(IDCANCEL, &CFingerExeDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_BUTTON3, &CFingerExeDlg::OnBnClickedButton3)
 	ON_BN_CLICKED(IDC_BUTTON4, &CFingerExeDlg::OnBnClickedButton4)
+	ON_BN_CLICKED(IDC_BUTTON_GetUserTmpStr, &CFingerExeDlg::OnBnClickedButtonGetusertmpstr)
 END_MESSAGE_MAP()
 
 
@@ -325,4 +326,21 @@ void CFingerExeDlg::OnBnClickedButton3()
 // 	
 	LPCTSTR lpRet = ZKTCP::GetAllUserInfo_WithJson(1);
 	OutPutDebug(lpRet);
+}
+
+void CFingerExeDlg::OnBnClickedButtonGetusertmpstr()
+{
+
+	BSTR tempData=0;
+	long tempDataLen=0;
+	for(int i=0;i<10;i++)
+	{
+		BOOL bRet = ZKTCP::GetUserTmpStr(1,999,i,&tempData,&tempDataLen);
+		if(bRet){
+			CString strTempData(tempData);
+			CString ss;
+			ss.Format(_T("%d__%s"),tempDataLen,strTempData);
+			OutPutDebug(ss);
+		}
+	}
 }

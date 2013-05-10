@@ -66,16 +66,24 @@ BOOL CAdapter::Connect_Net( LPCTSTR lpnativeAddress,int port )
 			return FALSE;
 		}
 	}
+	printf("Create ocx obj sucess.\n");
 	m_bConnected = FALSE;
 	m_bConnected=m_pIZKEM->Connect_Net(lpnativeAddress,port);
+
+	printf("Connect_Net(%s,%d) %d.\n",lpnativeAddress,port);
 	if(m_bConnected){
+		printf("****sysinfo---start********\n");
 		m_bTFTMachine = m_pIZKEM->IsTFTMachine(1);
-		BSTR bstrZKFPVersion;
+		printf("isTFT:%d\n ",m_bTFTMachine);
+		BSTR bstrZKFPVersion=NULL;
 		m_pIZKEM->GetSysOption(1, "~ZKFPVersion", &bstrZKFPVersion);
 		CString ss(bstrZKFPVersion);
+		if(bstrZKFPVersion!=NULL)
+			SysFreeString(bstrZKFPVersion);
 		m_ZKFPVersion = (ss==_T("10")) ? 10:9;
-		printf("****sysinfo---start********\n");
-		printf("isTFT:%d\n fpVersion:%s\n",m_bTFTMachine,ss);
+		_tprintf(_T("fpVersion:%d\n"),m_ZKFPVersion);
+
+		_tprintf(_T("fpVersion:%s\n"),ss);
 		printf("****sysinfo--end********\n");
 	}
 	return m_bConnected;
@@ -215,6 +223,7 @@ BOOL CAdapter::SetUserTmpStr( long dwMachineNumber, long dwEnrollNumber, long dw
 BOOL CAdapter::GetUserTmpStr( long dwMachineNumber, long dwEnrollNumber, long dwFingerIndex, BSTR * TmpData, long * TmpLength )
 {
 	if(!CheckConnectStatus())return FALSE;
+
 	if(m_ZKFPVersion==10){
 		CString strEnrollNumber;
 		strEnrollNumber.Format(_T("%d"),dwEnrollNumber);
@@ -226,6 +235,7 @@ BOOL CAdapter::GetUserTmpStr( long dwMachineNumber, long dwEnrollNumber, long dw
 			::SysFreeString(bstrEnrollNumber);
 		return bRet;
 	}
+	/**/
 	if(m_bTFTMachine){
 		CString strEnrollNumber;
 		strEnrollNumber.Format(_T("%d"),dwEnrollNumber);
