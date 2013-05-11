@@ -14,34 +14,54 @@ BOOL CheckConnectStatus()
 {
 	return g_Adapter.CheckConnectStatus();
 }
+jstring WindowsTojstring( JNIEnv* env, char* str )
+{  
+	jstring rtn = 0; 
+	int slen = strlen(str);  
+	unsigned short* buffer = 0; 
+	if( slen == 0 )
+		rtn = (env)->NewStringUTF(str );
+	else
+	{ 
+		int length = MultiByteToWideChar( CP_ACP, 0, (LPCSTR)str, slen, NULL, 0 );  
+		buffer = (unsigned short*)malloc( length*2 + 1 );
+		if( MultiByteToWideChar( CP_ACP, 0, (LPCSTR)str, slen, (LPWSTR)buffer, length ) >0 )  
+			rtn = (env)->NewString(  (jchar*)buffer, length );  
+	}  
+	if( buffer )  
+		free( buffer );  
+	return rtn; 
+}  
 jstring CStringTojstring(JNIEnv *m_penv,CString convert)  
 {  	
-	jstring retjstring;  
-	jsize iLoop;  
-	jsize jlength = convert.GetLength();  
-
-	jchar *dummystring = new jchar[jlength];
-	// First copy the character to a unicode form  
-	for (iLoop = 0; iLoop < jlength; iLoop++)  
-		dummystring[iLoop] = (jchar) convert.GetAt(iLoop);  
-	// I commented the following part because NewString takes the length to be converted  
-	// and it doesn't look to the excess string  
-	/* 
-	// Fill the rest of the string with nulls 
-	for (jLoop = iLoop; jLoop < MAX_RESULT_INFO; jLoop++) 
-	dummystring[iLoop] = (jchar) ""; 
-	*/  
-	retjstring = m_penv->NewString(dummystring, jlength);  
-	delete []dummystring;
+	jstring retjstring = WindowsTojstring(m_penv,convert.GetBuffer());
+	convert.ReleaseBuffer(0);
 	return retjstring;  
 }  
+char* jstringToWindows( JNIEnv *env, jstring jstr )
+{  
+	int length = (env)->GetStringLength(jstr );
+	const jchar* jcstr = (env)->GetStringChars(jstr, 0 );
+	char* rtn = (char*)malloc( length*2+1 );
+	int size = 0;
+	size = WideCharToMultiByte( CP_ACP, 0, (LPCWSTR)jcstr, length, rtn,(length*2+1), NULL, NULL );
+	(env)->ReleaseStringChars(jstr, jcstr );
+	if( size <= 0 )
+	{
+		free(rtn);
+		return NULL;
+	}
+	rtn[size] = 0;
+	return rtn;
+}  
+
 void OutPutFuncName(char *pFuncName){
-	printf("javaCallFunc-->%s @AdapterMain.cpp\n",pFuncName);
+	//printf("javaCallFunc-->%s @AdapterMain.cpp\n",pFuncName);
 }
 JNIEXPORT jstring JNICALL Java_TestFingerDLL_testJni(JNIEnv *env, jobject obj, jstring pString){
 	OutPutFuncName(__FUNCTION__);
 	const char *nativeString = env->GetStringUTFChars(pString,0);
-	printf("\n===xxxx%s\n",nativeString);
+	//printf("\n===xxxx%s\n",nativeString);
 
 	env->ReleaseStringUTFChars(pString,nativeString);
 
@@ -75,7 +95,7 @@ JNIEXPORT LPCTSTR JNICALL GetALLGeneralLogData_withJson( long dwMachineNumber)
 	CString strRet(_T("{\"log\":["));
 	CString strEnd(_T("]}"));
 	if(!ZKTCP::ReadAllGLogData(dwMachineNumber)){
-		printf(_T("m_zkem.ReadAllGLogData faild"));
+		//printf(_T("m_zkem.ReadAllGLogData faild"));
 		ZKTCP::EnableDevice(dwMachineNumber,TRUE);
 		return strRet+strEnd;
 	}
@@ -140,34 +160,35 @@ JNIEXPORT LPCTSTR JNICALL GetAllUserInfo_WithJson(long dwMachineNumber)
 	int nDataCount = 0;
 
 	ZKTCP::EnableDevice(dwMachineNumber,FALSE);
-	while(g_Adapter.GetAllUserInfo(dwMachineNumber,
-		&dwEnrollNumber,
-		&userName,
-		&passWord,
-		&Privilege,
-		&bEnabled)){		
-			CString strRet_OneLog;
-			CString ssName(userName);
-			CString ssPassword(passWord);
-			strRet_OneLog.Format(_T("{\"dwEnrollNumber\":%d,\"name\":\"%s\",\"pass\":\"%s\",\"Privilege\":%d,\"enable\":%d},"),
-				dwEnrollNumber,ssName,ssPassword,Privilege,bEnabled);
-			strRet+=strRet_OneLog;
-			printf("UserInfo[%d]===%s",nDataCount,strRet_OneLog);
-			nDataCount ++;
+	if(g_Adapter.ReadAllUserID(dwMachineNumber)){
+		while(g_Adapter.GetAllUserInfo(dwMachineNumber,
+			&dwEnrollNumber,
+			&userName,
+			&passWord,
+			&Privilege,
+			&bEnabled)){		
+				CString strRet_OneLog;
+				CString ssName(userName);
+				CString ssPassword(passWord);
+				strRet_OneLog.Format(_T("{\"dwEnrollNumber\":%d,\"name\":\"%s\",\"pass\":\"%s\",\"Privilege\":%d,\"enable\":%d},"),
+					dwEnrollNumber,ssName,ssPassword,Privilege,bEnabled);
+				strRet+=strRet_OneLog;
+				//printf("UserInfo[%d]===%s",nDataCount,strRet_OneLog);
+				nDataCount ++;
 
-			dwEnrollNumber = 0;
-			Privilege = 0;
-			bEnabled = VARIANT_FALSE;
-			if(userName!=NULL){
-				SysFreeString(userName);
-				userName =NULL;
-			}
-			if(passWord!=NULL){
-				SysFreeString(passWord);
-				passWord = NULL;
-			}
+				dwEnrollNumber = 0;
+				Privilege = 0;
+				bEnabled = VARIANT_FALSE;
+				if(userName!=NULL){
+					SysFreeString(userName);
+					userName =NULL;
+				}
+				if(passWord!=NULL){
+					SysFreeString(passWord);
+					passWord = NULL;
+				}
+		}
 	}
-
 	ZKTCP::EnableDevice(dwMachineNumber,TRUE);
 	if(nDataCount>0){
 		strRet.Delete(strRet.GetLength()-1);
@@ -358,19 +379,6 @@ JNIEXPORT jstring JNICALL Java_com_yumt_zksoft_ZKTCP_GetAllUserInfo
 	
 	return CStringTojstring(pjniEnv,ZKTCP::GetAllUserInfo_WithJson(dwMachineNumber));
 }
-char* jstringToWindows( JNIEnv *env, jstring jstr )
-{  
-	int length = (env)->GetStringLength(jstr );
-	const jchar* jcstr = (env)->GetStringChars(jstr, 0 );
-	char* rtn = (char*)malloc( length*2+1 );
-	int size = 0;
-	size = WideCharToMultiByte( CP_ACP, 0, (LPCWSTR)jcstr, length, rtn,(length*2+1), NULL, NULL );
-	(env)->ReleaseStringChars(jstr, jcstr );
-	if( size <= 0 )
-		return NULL;
-	rtn[size] = 0;
-	return rtn;
-}  
 /*
  * Class:     com_yumt_zksoft_ZKTCP
  * Method:    SetUserInfo
@@ -388,13 +396,12 @@ JNIEXPORT jboolean JNICALL Java_com_yumt_zksoft_ZKTCP_SetUserInfo
 
 	char *nativePass= jstringToWindows(pjniEnv,pass);
 
-	printf("name:%s\npass:%s\n",nativeName,nativePass);
 	BOOL bRet = g_Adapter.SetUserInfo(dwMachineNumber,dwEnrollNumber,nativeName,nativePass,privilege,enable);
 
 	if(nativeName)
-		delete [] nativeName;
+		free( nativeName);
 	if(nativePass)
-		delete []nativePass;
+		free(nativePass);
 
 	//pjniEnv->ReleaseStringUTFChars(name,nativeName);
 	//pjniEnv->ReleaseStringUTFChars(pass,nativePass);
