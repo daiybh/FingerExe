@@ -7,7 +7,7 @@
 #include "FingerExeDlg.h"
 #include "com_yumt_zksoft_ZKTCP_cpp.h"
 
-#pragma comment(lib,"E:\\workspace\\其他人的\\谢松云\\指纹脱机开发包\\FingerExe\\Release\\zksoftAdapter.lib")
+#pragma comment(lib,"..\\Release\\zksoftAdapter.lib")
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
