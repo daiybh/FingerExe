@@ -16,7 +16,7 @@ CAdapter::~CAdapter(void)
 BOOL CAdapter::CheckConnectStatus()
 {
 	if(!m_bConnected){
-		printf("Error:Had not Connect the devices\n");
+		//outPrintf("Error:Had not Connect the devices\n");
 		return FALSE;
 	}
 	return TRUE;
@@ -65,25 +65,22 @@ BOOL CAdapter::Connect_Net( LPCTSTR lpnativeAddress,int port )
 			return FALSE;
 		}
 	}
-	printf("Create ocx obj sucess.\n");
+	
 	m_bConnected = FALSE;
 	m_bConnected=m_pIZKEM->Connect_Net(lpnativeAddress,port);
 
-	printf("Connect_Net(%s,%d) %d.\n",lpnativeAddress,port);
 	if(m_bConnected){
-		printf("****sysinfo---start********\n");
 		m_bTFTMachine = m_pIZKEM->IsTFTMachine(1);
-		printf("isTFT:%d\n ",m_bTFTMachine);
 		BSTR bstrZKFPVersion=NULL;
 		m_pIZKEM->GetSysOption(1, "~ZKFPVersion", &bstrZKFPVersion);
 		CString ss(bstrZKFPVersion);
 		if(bstrZKFPVersion!=NULL)
 			SysFreeString(bstrZKFPVersion);
 		m_ZKFPVersion = (ss==_T("10")) ? 10:9;
-		_tprintf(_T("fpVersion:%d\n"),m_ZKFPVersion);
+		//_tprintf(_T("fpVersion:%d\n"),m_ZKFPVersion);
 
-		_tprintf(_T("fpVersion:%s\n"),ss);
-		printf("****sysinfo--end********\n");
+		//_tprintf(_T("fpVersion:%s\n"),ss);
+		//printf("****sysinfo--end********\n");
 	}
 	return m_bConnected;
 }
@@ -112,15 +109,10 @@ BOOL CAdapter::GetGeneralLogData( long dwMachineNumber, long * dwTMachineNumber,
 		bRet = m_pIZKEM->SSR_GetGeneralLogData(dwMachineNumber,
 			&bstrEnrollNumber,dwVerifyMode,dwInOutMode,dwYear,dwMonth,dwDay,dwHour,dwMinute,dwSecond,&dwWorkCode);
 		if(bRet){
-			CString strLog;
 			CString enroll(bstrEnrollNumber);
 			char* lpszText2 = _com_util::ConvertBSTRToString(bstrEnrollNumber);
 			
 			*dwEnrollNumber = (lpszText2==NULL)?0:atoi(lpszText2);
-			strLog.Format(_T("CAdapter::GetGeneralLogData %d-%d,%d,%d,%d-%d-%d %d:%d:%d\n"),
-				dwMachineNumber,*dwEnrollNumber,*dwVerifyMode,*dwInOutMode,
-				*dwYear,*dwMonth,*dwDay,*dwHour,*dwMinute,*dwSecond);
-			printf(strLog);
 		}
 		if(bstrEnrollNumber!=NULL)
 			::SysFreeString(bstrEnrollNumber);
